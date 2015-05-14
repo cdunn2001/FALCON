@@ -37,7 +37,8 @@
 # SUCH DAMAGE.
 #################################################################################$$
 
-from falcon_kit.multiproc import Pool
+from multiprocessing import Pool as RealPool
+from falcon_kit.debug import FakePool
 import argparse
 import subprocess as sp
 import shlex
@@ -272,6 +273,10 @@ def fc_ovlp_filter(n_core, fofn, max_diff, max_cov, min_cov, min_len, bestn, db_
     global LOG
     if silent:
         LOG = write_nothing
+    if debug:
+        Pool = FakePool
+    else:
+        Pool = RealPool
     exe_pool = Pool(n_core)
 
     file_list = open(fofn).read().split("\n")
