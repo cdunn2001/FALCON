@@ -1,5 +1,6 @@
 /build/
 /dist/
 /falcon_kit.egg-info/
+/fc_env/
 *.pyc
 *.pyo
