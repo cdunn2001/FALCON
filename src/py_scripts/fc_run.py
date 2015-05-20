@@ -138,12 +138,12 @@ def do_sleep(self):
                 "cwd": os.getcwd(),
                 "sge_option": sge_option_da,
                 "script_fn": script_fn }
-    fc_run_logger.error("about to run %r, %r" %(job_data, config["job_type"]))
+    fc_run_logger.debug("about to run %r, %r" %(job_data, config["job_type"]))
     run_script(job_data, job_type = config["job_type"])
-    fc_run_logger.error("started, waiting for %r" %(job_data,))
+    fc_run_logger.debug("started, waiting for %r" %(job_data,))
     #raise Exception(job_data)
     wait_for_file( fn(sleep_done), task=self, job_name=job_name )
-    fc_run_logger.error("finished waiting for %r" %(job_data,))
+    fc_run_logger.debug("finished waiting for %r" %(job_data,))
 def build_rdb(self):  #essential the same as build_rdb() but the subtle differences are tricky to consolidate to one function
     fc_run_logger.info("in build_rdb, %r" %(self.parameters,))
     input_fofn = self.input_fofn
@@ -198,12 +198,12 @@ def build_rdb(self):  #essential the same as build_rdb() but the subtle differen
                 "cwd": os.getcwd(),
                 "sge_option": sge_option_da,
                 "script_fn": script_fn }
-    fc_run_logger.error("about to run %r, %r" %(job_data, config["job_type"]))
+    fc_run_logger.debug("about to run %r, %r" %(job_data, config["job_type"]))
     run_script(job_data, job_type = config["job_type"])
-    fc_run_logger.error("started, waiting for %r" %(job_data,))
+    fc_run_logger.debug("started, waiting for %r" %(job_data,))
     #raise Exception(job_data)
     wait_for_file( fn(rdb_build_done), task=self, job_name=job_name )
-    fc_run_logger.error("finished waiting for %r" %(job_data,))
+    fc_run_logger.debug("finished waiting for %r" %(job_data,))
 
 def build_pdb(self):
 
