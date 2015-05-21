@@ -117,8 +117,35 @@ def wait_for_file(filename, task, job_name = ""):
                 os.system("qdel %s" % job_name) # Failure is ok.
             break
 
+def do_sleep(self):
+    fc_run_logger.info("in do_sleep, %r" %(self.parameters,))
+    input_fofn = self.input_fofn
+    input_fofn_fn = fn(input_fofn)
+    sleep_done = self.sleep_done
+    work_dir = self.parameters["work_dir"]
+    config = self.parameters["config"]
+    sge_option_da = config["sge_option_da"]
+    install_prefix = config["install_prefix"]
+    script_fn = os.path.join( work_dir, "sleep.sh" )
+    with open(script_fn,"w") as script_file:
+        script_file.write("set -e\n")
+        script_file.write("trap 'touch {sleep_done}.exit' EXIT\n".format(sleep_done = fn(sleep_done)))
+        script_file.write("sleep 1\n")
+        script_file.write("touch {sleep_done}\n".format(sleep_done = fn(sleep_done)))
+    job_name = self.URL.split("/")[-1]
+    job_name += "-"+str(uuid.uuid4())[:8]
+    job_data = {"job_name": job_name,
+                "cwd": os.getcwd(),
+                "sge_option": sge_option_da,
+                "script_fn": script_fn }
+    fc_run_logger.error("about to run %r, %r" %(job_data, config["job_type"]))
+    run_script(job_data, job_type = config["job_type"])
+    fc_run_logger.error("started, waiting for %r" %(job_data,))
+    #raise Exception(job_data)
+    wait_for_file( fn(sleep_done), task=self, job_name=job_name )
+    fc_run_logger.error("finished waiting for %r" %(job_data,))
 def build_rdb(self):  #essential the same as build_rdb() but the subtle differences are tricky to consolidate to one function
-
+    fc_run_logger.info("in build_rdb, %r" %(self.parameters,))
     input_fofn = self.input_fofn
     input_fofn_fn = fn(input_fofn)
     rdb_build_done = self.rdb_build_done
@@ -171,8 +198,12 @@ def build_rdb(self):  #essential the same as build_rdb() but the subtle differen
                 "cwd": os.getcwd(),
                 "sge_option": sge_option_da,
                 "script_fn": script_fn }
+    fc_run_logger.error("about to run %r, %r" %(job_data, config["job_type"]))
     run_script(job_data, job_type = config["job_type"])
+    fc_run_logger.error("started, waiting for %r" %(job_data,))
+    #raise Exception(job_data)
     wait_for_file( fn(rdb_build_done), task=self, job_name=job_name )
+    fc_run_logger.error("finished waiting for %r" %(job_data,))
 
 def build_pdb(self):
 
@@ -700,20 +731,28 @@ def main(prog_name, input_config_fn, logger_config_fn=None):
     if config["input_type"] == "raw":
         #### import sequences into daligner DB
         input_h5_fofn = makePypeLocalFile(input_fofn_fn)
+        sleep_done = makePypeLocalFile( os.path.join( rawread_dir, "sleep_done") )
         rdb_build_done = makePypeLocalFile( os.path.join( rawread_dir, "rdb_build_done") ) 
         parameters = {"work_dir": rawread_dir,
                       "config": config}
 
+        make_sleep_task = PypeTask(inputs = {"input_fofn": input_h5_fofn},
+                                      outputs = {"sleep_done": sleep_done},
+                                      parameters = parameters,
+                                      TaskType = PypeThreadTaskBase)
         make_build_rdb_task = PypeTask(inputs = {"input_fofn": input_h5_fofn},
                                       outputs = {"rdb_build_done": rdb_build_done}, 
                                       parameters = parameters,
                                       TaskType = PypeThreadTaskBase)
-
+        sleep_task = make_sleep_task(do_sleep)
         build_rdb_task = make_build_rdb_task(build_rdb)
 
+        wf.addTasks([sleep_task])
         wf.addTasks([build_rdb_task])
-        wf.refreshTargets([rdb_build_done]) 
-        
+        #wf.refreshTargets([sleep_done, rdb_build_done])
+        wf.refreshTargets([rdb_build_done])
+        #wf.refreshTargets([sleep_done])
+
 
         db_file = makePypeLocalFile(os.path.join( rawread_dir, "%s.db" % "raw_reads" ))
         #### run daligner
