@@ -145,7 +145,8 @@ def do_sleep(self):
     wait_for_file( fn(sleep_done), task=self, job_name=job_name )
     fc_run_logger.debug("finished waiting for %r" %(job_data,))
 def build_rdb(self):  #essential the same as build_rdb() but the subtle differences are tricky to consolidate to one function
-    fc_run_logger.info("in build_rdb, %r" %(self.parameters,))
+    fc_run_logger.info("in build_rdb, %r, %r" %(self.parameters, self.input_fofn))
+
     input_fofn = self.input_fofn
     input_fofn_fn = fn(input_fofn)
     rdb_build_done = self.rdb_build_done
@@ -746,6 +747,7 @@ def main(prog_name, input_config_fn, logger_config_fn=None):
                                       TaskType = PypeThreadTaskBase)
         sleep_task = make_sleep_task(do_sleep)
         build_rdb_task = make_build_rdb_task(build_rdb)
+        fc_run_logger.debug("created build_rdb_task")
 
         wf.addTasks([sleep_task])
         wf.addTasks([build_rdb_task])
