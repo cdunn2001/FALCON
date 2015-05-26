@@ -38,7 +38,7 @@
 #################################################################################$$
 
 
-from pypeflow.common import * 
+from pypeflow.common import PypeError
 from pypeflow.data import PypeLocalFile, makePypeLocalFile, fn
 from pypeflow.task import PypeTask, PypeThreadTaskBase, PypeTaskBase
 from pypeflow.controller import PypeWorkflow, PypeThreadWorkflow
@@ -82,11 +82,8 @@ def run_script(job_data, job_type = "SGE" ):
     if rc:
         msg = "Cmd %r (job %r) returned %d." % (cmd, job_name, rc)
         fc_run_logger.info(msg)
-        # For non-qsub, this might still help with debugging. But technically
-        # we should not raise here, as a failure should be noticed later.
-        # When we are confident that script failures are handled well,
-        # we can make this optional.
-        raise Exception(msg)
+        # pypeFLOW should trap this exception and set the Fail status.
+        raise PypeError(msg)
     else:
         msg = "Cmd %r (job %r) returned %d" % (cmd, job_name, rc)
         fc_run_logger.debug(msg)
