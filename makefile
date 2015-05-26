@@ -4,7 +4,7 @@ install: install-DAZZ_DB install-DALIGNER install-pypeFLOW install-FALCON
 install-DAZZ_DB:
 	cd DAZZ_DB; make; ln -sf $$PWD/DBrm $$PWD/DBshow $$PWD/DBsplit $$PWD/DBstats $$PWD/fasta2DB ${VDIR}/bin/
 install-DALIGNER:
-	cd DALIGNER; make; ln -sf $$PWD/daligner $$PWD/daligner_p $$PWD/DB2Falcon $$PWD/HPCdaligner $$PWD/LA4Falcon $$PWD/LAmerge $$PWD/LAsort  ${VDIR}/bin
+	cd DALIGNER; make; ln -sf $$PWD/daligner $$PWD/daligner_p $$PWD/DB2Falcon $$PWD/HPCdaligner $$PWD/LA4Falcon $$PWD/LAmerge $$PWD/LAsort $$PWD/LAcat $$PWD/LAshow  ${VDIR}/bin
 install-pypeFLOW:
 	cd pypeFLOW; . ${VDIR}/bin/activate; python setup.py install
 install-FALCON:
